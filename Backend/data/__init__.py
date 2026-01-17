@@ -1,5 +1,6 @@
 """Data package for Finance AI Agent."""
 
+from .cache import build_cache_key, get_cache
 from .contracts import (
     AssetType,
     DataError,
@@ -13,6 +14,7 @@ from .contracts import (
     validate_data_error,
     validate_data_response,
 )
+from .price_adapter import get_prices
 
 __all__ = [
     "AssetType",
@@ -26,4 +28,7 @@ __all__ = [
     "RequestedField",
     "validate_data_error",
     "validate_data_response",
+    "get_prices",
+    "get_cache",
+    "build_cache_key",
 ]
