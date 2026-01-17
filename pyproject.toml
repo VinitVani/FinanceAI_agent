@@ -14,9 +14,11 @@ line_length = 88
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+exclude = [".git", ".venv", "build", "dist"]
+
+[tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = []
-exclude = [".git", ".venv", "build", "dist"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

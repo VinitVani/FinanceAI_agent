@@ -1,0 +1,8 @@
+[run]
+omit =
+    */tests/*
+    */test_*
+    day4_verify.py
+    */__pycache__/*
+    */venv/*
+    */env/*
