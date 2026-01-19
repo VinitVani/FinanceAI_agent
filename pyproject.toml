@@ -2,8 +2,9 @@
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["Backend", "Backend.agent", "Backend.core", "Backend.data", "Backend.service"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["Backend*"]
 
 [project]
 name = "financeai-agent"

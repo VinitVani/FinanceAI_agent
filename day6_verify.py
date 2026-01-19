@@ -99,7 +99,7 @@ print("\n6. Testing validation...")
 base = adapter.fetch_fundamentals("AAPL", AssetType.STOCK)
 
 # Create a new Fundamentals instance with a missing mandatory field
-from Backend.data import Fundamentals  # noqa: E402, I001 Imported here to avoid circular issues
+from Backend.data import Fundamentals  # noqa: E402, I001 # isort: skip
 
 incomplete = Fundamentals(
     pe_ratio=None,  # Simulate missing mandatory field
