@@ -2,15 +2,13 @@
 """Verify Day 6 implementation."""
 
 from Backend.data import AssetType
+from Backend.data.cache import get_cache
 from Backend.data.fundamentals import (
     FundamentalsAdapter,
     MacroDataAdapter,
     get_fundamentals_with_cache,
-    get_macro_data_with_cache,
     normalize_fundamentals,
 )
-from Backend.data.cache import get_cache
-
 
 print("=" * 60)
 print("DAY 6 VERIFICATION")
@@ -101,7 +99,7 @@ print("\n6. Testing validation...")
 base = adapter.fetch_fundamentals("AAPL", AssetType.STOCK)
 
 # Create a new Fundamentals instance with a missing mandatory field
-from Backend.data import Fundamentals  # Imported here to avoid circular issues
+from Backend.data import Fundamentals  # noqa: E402, I001 Imported here to avoid circular issues
 
 incomplete = Fundamentals(
     pe_ratio=None,  # Simulate missing mandatory field
@@ -130,4 +128,3 @@ print("- Macro indicators work")
 print("- Caching reduces redundant fetches")
 print("- Normalization handles messy input")
 print("- Validation catches data quality issues")
-

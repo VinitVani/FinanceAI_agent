@@ -1,4 +1,5 @@
-from Backend.core.llm_client import get_llm_client, LLMError
+from Backend.core.llm_client import LLMError, get_llm_client
+
 
 def run_example_agent():
     print("Initializing Example Agent...")
@@ -11,6 +12,7 @@ def run_example_agent():
         print(f"Agent failed: {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
+
 
 if __name__ == "__main__":
     run_example_agent()

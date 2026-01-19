@@ -14,7 +14,6 @@ from .contracts import (
     validate_data_error,
     validate_data_response,
 )
-from .price_adapter import get_prices
 from .fundamentals import (
     FundamentalsAdapter,
     MacroDataAdapter,
@@ -22,6 +21,7 @@ from .fundamentals import (
     get_macro_data_with_cache,
     normalize_fundamentals,
 )
+from .price_adapter import get_prices
 
 __all__ = [
     "AssetType",
@@ -44,4 +44,3 @@ __all__ = [
     "get_macro_data_with_cache",
     "normalize_fundamentals",
 ]
-

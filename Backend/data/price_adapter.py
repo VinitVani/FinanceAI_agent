@@ -37,24 +37,24 @@ REQUEST_TIMEOUT = 10  # seconds
 class CryptoPriceAdapter:
     """
     Adapter for fetching cryptocurrency prices from CoinGecko.
-    
+
     CoinGecko API:
     - No API key required for basic usage
     - Rate limit: ~50 calls/minute
     - Free tier sufficient for MVP
     """
-    
+
     def __init__(self):
         """Initialize adapter."""
         self.base_url = COINGECKO_BASE_URL
-    
+
     def fetch_prices(self, request: DataRequest) -> Union[DataResponse, DataError]:
         """
         Fetch crypto prices for given request.
-        
+
         Args:
             request: DataRequest with ticker, dates, etc.
-            
+
         Returns:
             DataResponse with OHLC data or DataError
         """
@@ -68,7 +68,7 @@ class CryptoPriceAdapter:
                     retryable=False,
                     original_request=request,
                 )
-            
+
             # Build API request
             # Convert date to Unix timestamp
             start_timestamp = int(
@@ -77,18 +77,18 @@ class CryptoPriceAdapter:
             end_timestamp = int(
                 datetime.combine(request.end_date, datetime.max.time()).timestamp()
             )
-            
+
             params = {
                 "vs_currency": "usd",
                 "from": start_timestamp,
                 "to": end_timestamp,
             }
-            
+
             url = f"{self.base_url}/coins/{coin_id}/market_chart/range"
-            
+
             # Make API call
             response = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
-            
+
             # Handle rate limiting
             if response.status_code == 429:
                 return DataError(
@@ -98,7 +98,7 @@ class CryptoPriceAdapter:
                     original_request=request,
                     details={"retry_after": 60},
                 )
-            
+
             # Handle other errors
             if response.status_code != 200:
                 return DataError(
@@ -107,13 +107,13 @@ class CryptoPriceAdapter:
                     retryable=True,
                     original_request=request,
                 )
-            
+
             # Parse response
             data = response.json()
-            
+
             # Convert to OHLC format
             ohlc_data = self._convert_to_ohlc(data, request)
-            
+
             # Build metadata
             metadata = DataMetadata(
                 source="coingecko",
@@ -123,7 +123,7 @@ class CryptoPriceAdapter:
                 warnings=[],
                 cache_hit=False,
             )
-            
+
             # Return structured response
             return DataResponse(
                 request=request,
@@ -132,7 +132,7 @@ class CryptoPriceAdapter:
                 fundamentals=None,  # Crypto doesn't have fundamentals
                 success=True,
             )
-            
+
         except requests.Timeout:
             return DataError(
                 error_code=ErrorCode.API_FAILURE,
@@ -147,20 +147,20 @@ class CryptoPriceAdapter:
                 retryable=False,
                 original_request=request,
             )
-    
+
     def _ticker_to_coin_id(self, ticker: str) -> Optional[str]:
         """
         Convert ticker symbol to CoinGecko coin ID.
-        
+
         Args:
             ticker: Ticker like "BTC-USD", "ETH-USD"
-            
+
         Returns:
             CoinGecko coin ID or None if unknown
         """
         # Remove -USD suffix if present
         base_ticker = ticker.upper().replace("-USD", "")
-        
+
         # Map common tickers to CoinGecko IDs
         ticker_map = {
             "BTC": "bitcoin",
@@ -174,22 +174,22 @@ class CryptoPriceAdapter:
             "AVAX": "avalanche-2",
             "DOT": "polkadot",
         }
-        
+
         return ticker_map.get(base_ticker)
-    
+
     def _convert_to_ohlc(
         self, api_data: dict, request: DataRequest
     ) -> List[OHLCCandle]:
         """
         Convert CoinGecko response to OHLC candles.
-        
+
         CoinGecko returns:
         {
             "prices": [[timestamp_ms, price], ...],
             "market_caps": [[timestamp_ms, cap], ...],
             "total_volumes": [[timestamp_ms, volume], ...]
         }
-        
+
         We need to:
         1. Group by date
         2. Calculate open, high, low, close
@@ -197,10 +197,10 @@ class CryptoPriceAdapter:
         """
         prices = api_data.get("prices", [])
         volumes = api_data.get("total_volumes", [])
-        
+
         if not prices:
             return []
-        
+
         # Group prices by date
         daily_data = {}
         for timestamp_ms, price in prices:
@@ -208,18 +208,18 @@ class CryptoPriceAdapter:
             if date_obj not in daily_data:
                 daily_data[date_obj] = []
             daily_data[date_obj].append(price)
-        
+
         # Group volumes by date
         daily_volumes = {}
         for timestamp_ms, volume in volumes:
             date_obj = datetime.fromtimestamp(timestamp_ms / 1000).date()
             daily_volumes[date_obj] = volume
-        
+
         # Create OHLC candles
         candles = []
         for date_obj in sorted(daily_data.keys()):
             prices_for_day = daily_data[date_obj]
-            
+
             candle = OHLCCandle(
                 date=date_obj,
                 open=prices_for_day[0],  # First price of day
@@ -229,36 +229,36 @@ class CryptoPriceAdapter:
                 volume=int(daily_volumes.get(date_obj, 0)),
             )
             candles.append(candle)
-        
+
         return candles
 
 
 class EquityPriceAdapter:
     """
     Stub adapter for equity prices.
-    
+
     Returns fake but valid data for testing.
     Real implementation (Yahoo/Alpha Vantage) comes later.
     """
-    
+
     def __init__(self):
         """Initialize adapter."""
         pass
-    
+
     def fetch_prices(self, request: DataRequest) -> Union[DataResponse, DataError]:
         """
         Generate stub equity price data.
-        
+
         Args:
             request: DataRequest with ticker, dates, etc.
-            
+
         Returns:
             DataResponse with fake OHLC data
         """
         try:
             # Generate fake data
             ohlc_data = self._generate_stub_data(request)
-            
+
             metadata = DataMetadata(
                 source="equity_stub",
                 fetched_at=datetime.now(timezone.utc),
@@ -267,7 +267,7 @@ class EquityPriceAdapter:
                 warnings=["Using stub data - not real equity prices"],
                 cache_hit=False,
             )
-            
+
             return DataResponse(
                 request=request,
                 metadata=metadata,
@@ -275,7 +275,7 @@ class EquityPriceAdapter:
                 fundamentals=None,
                 success=True,
             )
-            
+
         except Exception as e:
             return DataError(
                 error_code=ErrorCode.API_FAILURE,
@@ -283,22 +283,22 @@ class EquityPriceAdapter:
                 retryable=False,
                 original_request=request,
             )
-    
+
     def _generate_stub_data(self, request: DataRequest) -> List[OHLCCandle]:
         """Generate fake but realistic-looking OHLC data."""
         candles = []
         current_date = request.start_date
         base_price = 150.0  # Starting price
-        
+
         while current_date <= request.end_date:
             # Simple random walk
             daily_change = (random.random() - 0.5) * 5
-            
+
             open_price = base_price
             close_price = base_price + daily_change
             high_price = max(open_price, close_price) * 1.01
             low_price = min(open_price, close_price) * 0.99
-            
+
             candle = OHLCCandle(
                 date=current_date,
                 open=round(open_price, 2),
@@ -308,26 +308,26 @@ class EquityPriceAdapter:
                 volume=int(1_000_000 + random.random() * 5_000_000),
             )
             candles.append(candle)
-            
+
             base_price = close_price
             current_date += timedelta(days=1)
-        
+
         return candles
 
 
 def get_prices(request: DataRequest) -> Union[DataResponse, DataError]:
     """
     Main entry point for fetching prices.
-    
+
     This function:
     1. Checks cache first
     2. Routes to correct adapter based on asset type
     3. Caches successful responses
     4. Returns DataResponse or DataError
-    
+
     Args:
         request: DataRequest with ticker, dates, asset type
-        
+
     Returns:
         DataResponse or DataError
     """
@@ -337,11 +337,11 @@ def get_prices(request: DataRequest) -> Union[DataResponse, DataError]:
         request.start_date.isoformat(),
         request.end_date.isoformat(),
     )
-    
+
     # Check cache first
     cache = get_cache()
     cached_response = cache.get(cache_key)
-    
+
     if cached_response is not None:
         # Update metadata to indicate cache hit
         # Since metadata is frozen, we need to create a new one
@@ -361,7 +361,7 @@ def get_prices(request: DataRequest) -> Union[DataResponse, DataError]:
             fundamentals=cached_response.fundamentals,
             success=cached_response.success,
         )
-    
+
     # Cache miss - fetch from adapter
     if request.asset_type == AssetType.CRYPTO:
         adapter = CryptoPriceAdapter()
@@ -376,12 +376,12 @@ def get_prices(request: DataRequest) -> Union[DataResponse, DataError]:
             retryable=False,
             original_request=request,
         )
-    
+
     # Fetch data
     response = adapter.fetch_prices(request)
-    
+
     # Cache successful responses only
     if isinstance(response, DataResponse) and response.success:
         cache.set(cache_key, response, ttl)
-    
+
     return response

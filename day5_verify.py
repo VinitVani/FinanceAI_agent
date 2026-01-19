@@ -3,11 +3,7 @@
 
 from datetime import date
 
-from Backend.data import (
-    AssetType,
-    DataRequest,
-    RequestedField,
-)
+from Backend.data import AssetType, DataRequest, RequestedField
 from Backend.data.cache import get_cache
 from Backend.data.price_adapter import get_prices
 

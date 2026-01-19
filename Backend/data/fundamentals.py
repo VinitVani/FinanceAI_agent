@@ -10,15 +10,11 @@ Key principles:
 - Mandatory fields are flagged if missing
 """
 
-from typing import Optional, Dict, Any, List
 import random
+from typing import Any, Dict, List, Optional
 
-from .contracts import (
-    AssetType,
-    Fundamentals,
-)
 from .cache import get_cache
-
+from .contracts import AssetType, Fundamentals
 
 # Cache TTL for fundamentals (longer than price data)
 FUNDAMENTALS_TTL = 60 * 60  # 1 hour (fundamentals change slowly)
@@ -77,9 +73,7 @@ class FundamentalsAdapter:
 
         # Generate realistic values (all trailing/TTM-style)
         pe_ratio = 10.0 + random.random() * 40.0  # 10-50
-        market_cap = (
-            100_000_000_000 + random.random() * 2_000_000_000_000
-        )  # 100B-2T
+        market_cap = 100_000_000_000 + random.random() * 2_000_000_000_000  # 100B-2T
         revenue = market_cap * (0.3 + random.random() * 0.5)  # 30-80% of market cap
         eps = random.random() * 20.0  # 0-20
         dividend_yield = (
@@ -265,7 +259,7 @@ def normalize_fundamentals(raw_data: Dict[str, Any]) -> Fundamentals:
 
         # Convert to correct type
         try:
-            if rules["type"] == float:
+            if rules["type"] is float:
                 # Remove percentage signs if present
                 if isinstance(value, str):
                     value = value.replace("%", "").strip()
@@ -399,4 +393,3 @@ Why? Forward metrics are:
 - Source of silent bugs
 - Not comparable across sources
 """
-

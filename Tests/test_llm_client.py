@@ -1,20 +1,26 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from Backend.core.llm_client import (
-    LLMClient, 
-    OpenAIClient, 
-    AnthropicClient, 
-    LocalClient, 
-    LLMProvider, 
-    LLMConfigurationError,
-    LLMError
-)
+
+import pytest
+
 from Backend.core.config import Settings
+from Backend.core.llm_client import (
+    AnthropicClient,
+    LLMClient,
+    LLMConfigurationError,
+    LLMError,
+    LLMProvider,
+    LocalClient,
+    OpenAIClient,
+)
+
 
 @pytest.fixture
 def mock_settings(monkeypatch):
     """Fixture to mock settings."""
-    def _mock_settings(provider, openai_key=None, anthropic_key=None, local_endpoint=None):
+
+    def _mock_settings(
+        provider, openai_key=None, anthropic_key=None, local_endpoint=None
+    ):
         settings = MagicMock(spec=Settings)
         settings.LLM_PROVIDER = provider
         settings.OPENAI_API_KEY = openai_key
@@ -23,12 +29,14 @@ def mock_settings(monkeypatch):
         settings.OPENAI_MODEL = "gpt-model"
         settings.ANTHROPIC_MODEL = "claude-model"
         settings.MAX_TOKENS = 100
-        
+
         # Patch get_settings to return our mock
         monkeypatch.setattr("Backend.core.llm_client.get_settings", lambda: settings)
         monkeypatch.setattr("Backend.core.config.get_settings", lambda: settings)
         return settings
+
     return _mock_settings
+
 
 class TestOpenAIClient:
     def test_init_raises_if_no_key(self, mock_settings):
@@ -45,29 +53,32 @@ class TestOpenAIClient:
     def test_generate_success(self, mock_settings):
         mock_settings(LLMProvider.OPENAI, openai_key="sk-test")
         with patch("openai.OpenAI") as MockOpenAI:
-             mock_instance = MockOpenAI.return_value
-             mock_completion = MagicMock()
-             mock_completion.choices[0].message.content = "test response"
-             mock_instance.chat.completions.create.return_value = mock_completion
-             
-             client = OpenAIClient()
-             response = client.generate("hello")
-             assert response == "test response"
+            mock_instance = MockOpenAI.return_value
+            mock_completion = MagicMock()
+            mock_completion.choices[0].message.content = "test response"
+            mock_instance.chat.completions.create.return_value = mock_completion
+
+            client = OpenAIClient()
+            response = client.generate("hello")
+            assert response == "test response"
 
     def test_generate_failure(self, mock_settings):
         mock_settings(LLMProvider.OPENAI, openai_key="sk-test")
         with patch("openai.OpenAI") as MockOpenAI:
             mock_instance = MockOpenAI.return_value
             mock_instance.chat.completions.create.side_effect = Exception("API Error")
-            
+
             client = OpenAIClient()
             with pytest.raises(LLMError, match="OpenAI generation failed"):
                 client.generate("hello")
 
+
 class TestAnthropicClient:
     def test_init_raises_if_no_key(self, mock_settings):
         mock_settings(LLMProvider.ANTHROPIC, anthropic_key=None)
-        with pytest.raises(LLMConfigurationError, match="ANTHROPIC_API_KEY is required"):
+        with pytest.raises(
+            LLMConfigurationError, match="ANTHROPIC_API_KEY is required"
+        ):
             AnthropicClient()
 
     def test_generate_success(self, mock_settings):
@@ -79,27 +90,33 @@ class TestAnthropicClient:
             mock_content.text = "claude response"
             mock_msg.content = [mock_content]
             mock_instance.messages.create.return_value = mock_msg
-            
+
             client = AnthropicClient()
             response = client.generate("hello")
             assert response == "claude response"
 
+
 class TestLocalClient:
     def test_init_raises_if_no_endpoint(self, mock_settings):
         mock_settings(LLMProvider.LOCAL, local_endpoint=None)
-        with pytest.raises(LLMConfigurationError, match="LOCAL_MODEL_ENDPOINT is required"):
+        with pytest.raises(
+            LLMConfigurationError, match="LOCAL_MODEL_ENDPOINT is required"
+        ):
             LocalClient()
 
     def test_generate_success(self, mock_settings):
         mock_settings(LLMProvider.LOCAL, local_endpoint="http://local")
         with patch("requests.post") as mock_post:
             mock_resp = MagicMock()
-            mock_resp.json.return_value = {"choices": [{"message": {"content": "local response"}}]}
+            mock_resp.json.return_value = {
+                "choices": [{"message": {"content": "local response"}}]
+            }
             mock_post.return_value = mock_resp
-            
+
             client = LocalClient()
             response = client.generate("hello")
             assert response == "local response"
+
 
 class TestLLMClientWrapper:
     def test_delegates_to_provider(self, mock_settings):
@@ -112,6 +129,7 @@ class TestLLMClientWrapper:
         mock_settings(LLMProvider.OPENAI, openai_key="sk-test")
         with patch("openai.OpenAI"):
             from Backend.core.llm_client import get_llm_client
+
             client = get_llm_client()
             assert isinstance(client, LLMClient)
 

@@ -11,19 +11,15 @@ Tests verify:
 
 import pytest
 
-from Backend.data import (
-    AssetType,
-    Fundamentals,
-)
+from Backend.data import AssetType, Fundamentals
+from Backend.data.cache import get_cache
 from Backend.data.fundamentals import (
     FundamentalsAdapter,
     MacroDataAdapter,
     get_fundamentals_with_cache,
     get_macro_data_with_cache,
     normalize_fundamentals,
-    NormalizationError,
 )
-from Backend.data.cache import get_cache
 
 
 class TestFundamentalsAdapter:
@@ -394,7 +390,10 @@ class TestTrailingVsForwardMetrics:
         """Schema should specify trailing in descriptions."""
         # Check that Fundamentals fields mention "trailing" or "TTM"
         pe_field = Fundamentals.model_fields["pe_ratio"]
-        assert "trailing" in pe_field.description.lower() or "ttm" in pe_field.description.lower()
+        assert (
+            "trailing" in pe_field.description.lower()
+            or "ttm" in pe_field.description.lower()
+        )
 
     def test_no_forward_metrics_in_output(self):
         """Output should never include forward estimates."""
@@ -405,4 +404,3 @@ class TestTrailingVsForwardMetrics:
         # (No forward_pe, forward_eps, etc.)
         assert not hasattr(result, "forward_pe")
         assert not hasattr(result, "forward_eps")
-
