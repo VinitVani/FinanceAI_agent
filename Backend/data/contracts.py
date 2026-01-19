@@ -117,17 +117,23 @@ class OHLCCandle(BaseModel):
 
 
 class Fundamentals(BaseModel):
-    """Company metrics and fundamentals."""
+    """Company fundamental metrics."""
 
-    pe_ratio: Optional[float] = Field(None, description="P/E ratio")
-    market_cap: Optional[float] = Field(None, description="Market cap in USD", ge=0)
-    revenue: Optional[float] = Field(None, description="Annual revenue in USD", ge=0)
-    eps: Optional[float] = Field(None, description="Earnings per share")
+    pe_ratio: Optional[float] = Field(
+        None, description="Price-to-Earnings ratio (trailing)"
+    )
+    market_cap: Optional[float] = Field(
+        None, description="Market capitalization in USD", ge=0
+    )
+    revenue: Optional[float] = Field(
+        None, description="Annual revenue in USD (TTM)", ge=0
+    )
+    eps: Optional[float] = Field(None, description="Earnings per share (trailing)")
     dividend_yield: Optional[float] = Field(
-        None, description="Dividend yield %", ge=0, le=100
+        None, description="Dividend yield as percentage", ge=0, le=100
     )
     beta: Optional[float] = Field(None, description="Beta coefficient")
-    currency: str = Field(default="USD", description="Currency")
+    currency: str = Field(default="USD", description="Currency for metrics")
 
     model_config = {"frozen": True}
 

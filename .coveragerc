@@ -3,6 +3,8 @@ omit =
     */tests/*
     */test_*
     day4_verify.py
+    day5_verify.py
+    day6_verify.py
     */__pycache__/*
     */venv/*
     */env/*

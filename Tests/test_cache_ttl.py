@@ -77,3 +77,24 @@ class TestCacheTTL:
         finally:
             # Restore original TTL
             price_adapter.EQUITY_TTL = original_ttl
+
+    def test_cache_methods(self):
+        """Test auxiliary cache methods (is_expired, cleanup, size)."""
+        cache = get_cache()
+        cache.set("k1", "v1", 10)
+        cache.set("k2", "v2", 0)  # Expired immediately
+        time.sleep(0.1)
+        
+        # Test size
+        assert cache.size() == 2
+        
+        # Test is_expired
+        assert not cache.is_expired("k1")
+        assert cache.is_expired("k2")
+        assert cache.is_expired("missing")
+        
+        # Test cleanup
+        removed = cache.cleanup_expired()
+        assert removed == 1
+        assert cache.size() == 1
+        assert cache.get("k1") == "v1"
