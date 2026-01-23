@@ -97,19 +97,46 @@ source venv/bin/activate  # macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
+### Backend (Days 4-6)
+```bash
+# Run tests
+pytest Tests/ -v
 
-Run the project (MVP placeholder)
-make run
+# Verify Day 4
+python3 day4_verify.py
 
+# Verify Day 5
+python3 day5_verify.py
 
-or
+# Verify Day 6
+python3 day6_verify.py
+```
 
-python backend/main.py
+### Frontend (Day 7)
+```bash
+# Install dependencies
+pip3 install streamlit pandas
 
+# Run the Streamlit app
+cd Frontend
+streamlit run app.py
+```
 
-Note: On Day 1, this may only start a placeholder service or print a startup message.
-That is expected.
+The app will be available at `http://localhost:8501`
 
+## Features
+
+### Current (Day 7)
+- 💬 Chat interface for querying
+- 📁 CSV portfolio upload
+- 📊 Portfolio preview
+- 🤖 Stub backend responses
+
+### Coming Soon
+- Day 8: LLM integration
+- Day 9: Planner Agent
+- Day 10: Analysis Agent
+- Day 12: Full end-to-end workflow
 Run tests
 make test
 
