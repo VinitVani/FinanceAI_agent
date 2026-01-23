@@ -3,7 +3,6 @@
 
 import sys
 from pathlib import Path
-import subprocess
 
 print("=" * 60)
 print("DAY 7 VERIFICATION")
@@ -36,6 +35,7 @@ if not all_exist:
 print("\n2. Checking Streamlit installation...")
 try:
     import streamlit
+
     print(f"   ✅ Streamlit {streamlit.__version__} installed")
 except ImportError:
     print("   ❌ Streamlit not installed")
@@ -46,6 +46,7 @@ except ImportError:
 print("\n3. Checking pandas installation...")
 try:
     import pandas
+
     print(f"   ✅ Pandas {pandas.__version__} installed")
 except ImportError:
     print("   ❌ Pandas not installed")
@@ -68,7 +69,8 @@ except SyntaxError as e:
 print("\n5. Checking utils/helpers.py...")
 try:
     sys.path.insert(0, str(Path("Frontend").absolute()))
-    from utils.helpers import validate_portfolio_csv, format_currency
+    from utils.helpers import format_currency
+
     print("   ✅ Helper functions importable")
 except Exception as e:
     print(f"   ❌ Error importing helpers: {e}")
@@ -81,13 +83,14 @@ try:
     result = format_currency(1234.56)
     assert result == "$1,234.56", f"Expected $1,234.56, got {result}"
     print("   ✅ format_currency works")
-    
+
     # Test format_percentage
     from utils.helpers import format_percentage
+
     result = format_percentage(12.345)
     assert result == "12.35%", f"Expected 12.35%, got {result}"
     print("   ✅ format_percentage works")
-    
+
 except Exception as e:
     print(f"   ❌ Helper function error: {e}")
     sys.exit(1)
